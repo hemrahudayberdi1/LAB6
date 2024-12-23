@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Coordinate System with Letter "H"</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+    .controls {
+      position: absolute;
+      bottom: 10px;
+      right: 10px; /* Positioned to the bottom-right corner */
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: flex-end;
+    }
+    button {
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .coordinates {
+      position: absolute;
+      top: 10px;
+      left: 10px; /* Coordinates display remains on the top-left */
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 5px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button id="rotateX">Rotate X</button>
+    <button id="rotateY">Rotate Y</button>
+    <button id="rotateZ">Rotate Z</button>
+    <button id="scaleUp">Scale Up</button>
+    <button id="scaleDown">Scale Down</button>
+    <button id="moveUp">Move Up</button>
+    <button id="moveDown">Move Down</button>
+    <button id="moveLeft">Move Left</button>
+    <button id="moveRight">Move Right</button>
+    <button id="moveForward">Move Forward</button>
+    <button id="moveBackward">Move Backward</button>
+    <button id="reset">Reset</button>
+    <button id="toggleCamera">Toggle Camera Rotation</button>
+  </div>
+  <div class="coordinates" id="coordinates">X: 0, Y: 0, Z: 0</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://threejs.org/examples/js/geometries/TextGeometry.js"></script>
+  <script src="https://threejs.org/examples/js/loaders/FontLoader.js"></script>
+  <script>
+    // Create the scene
+    const scene = new THREE.Scene();
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(5, 5, 5);
+    camera.lookAt(0, 0, 0);
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // GridHelper
+    const gridHelper = new THREE.GridHelper(10, 10);
+    scene.add(gridHelper);
+
+    // AxesHelper
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
+
+    // Font loader for the letter "H"
+    const loader = new THREE.FontLoader();
+    let textMesh; // Variable for the letter "H"
+
+    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+      const textGeometry = new THREE.TextGeometry('H', {
+        font: font,
+        size: 1, // Size of the letter
+        height: 0.2, // Thickness of the letter
+      });
+
+      const textMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
+      textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+      textMesh.position.set(0, 0, 0); // Initial position of the letter
+      scene.add(textMesh);
+    });
+
+    // Update coordinates display
+    const coordinatesDisplay = document.getElementById('coordinates');
+    function updateCoordinates() {
+      if (textMesh) {
+        const { x, y, z } = textMesh.position;
+        coordinatesDisplay.textContent = `X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}, Z: ${z.toFixed(2)}`;
+      }
+    }
+
+    // Controls
+    const controls = {
+      rotateX: () => {
+        if (textMesh) textMesh.rotation.x += Math.PI / 8; // Rotate around X
+      },
+      rotateY: () => {
+        if (textMesh) textMesh.rotation.y += Math.PI / 8; // Rotate around Y
+      },
+      rotateZ: () => {
+        if (textMesh) textMesh.rotation.z += Math.PI / 8; // Rotate around Z
+      },
+      scaleUp: () => {
+        if (textMesh) textMesh.scale.multiplyScalar(1.2); // Scale up
+      },
+      scaleDown: () => {
+        if (textMesh) textMesh.scale.multiplyScalar(0.8); // Scale down
+      },
+      moveUp: () => {
+        if (textMesh) textMesh.position.y += 0.1; // Move up
+      },
+      moveDown: () => {
+        if (textMesh) textMesh.position.y -= 0.1; // Move down
+      },
+      moveLeft: () => {
+        if (textMesh) textMesh.position.x -= 0.1; // Move left
+      },
+      moveRight: () => {
+        if (textMesh) textMesh.position.x += 0.1; // Move right
+      },
+      moveForward: () => {
+        if (textMesh) textMesh.position.z -= 0.1; // Move forward
+      },
+      moveBackward: () => {
+        if (textMesh) textMesh.position.z += 0.1; // Move backward
+      },
+      reset: () => {
+        if (textMesh) {
+          textMesh.rotation.set(0, 0, 0); // Reset rotation
+          textMesh.scale.set(1, 1, 1); // Reset scale
+          textMesh.position.set(0, 0, 0); // Reset position
+        }
+      },
+    };
+
+    // Bind buttons to control functions
+    document.getElementById('rotateX').addEventListener('click', controls.rotateX);
+    document.getElementById('rotateY').addEventListener('click', controls.rotateY);
+    document.getElementById('rotateZ').addEventListener('click', controls.rotateZ);
+    document.getElementById('scaleUp').addEventListener('click', controls.scaleUp);
+    document.getElementById('scaleDown').addEventListener('click', controls.scaleDown);
+    document.getElementById('moveUp').addEventListener('click', controls.moveUp);
+    document.getElementById('moveDown').addEventListener('click', controls.moveDown);
+    document.getElementById('moveLeft').addEventListener('click', controls.moveLeft);
+    document.getElementById('moveRight').addEventListener('click', controls.moveRight);
+    document.getElementById('moveForward').addEventListener('click', controls.moveForward);
+    document.getElementById('moveBackward').addEventListener('click', controls.moveBackward);
+    document.getElementById('reset').addEventListener('click', controls.reset);
+
+    // Orbit logic for the camera
+    let angle = 0;
+    const radius = 10; // Distance from the object
+    let rotateCamera = false;
+
+    function toggleCameraRotation() {
+      rotateCamera = !rotateCamera;
+    }
+
+    document.getElementById('toggleCamera').addEventListener('click', toggleCameraRotation);
+
+    function updateCamera() {
+      if (rotateCamera) {
+        angle += 0.01; // Speed of rotation
+        const x = radius * Math.sin(angle);
+        const z = radius * Math.cos(angle);
+        camera.position.set(x, 5, z); // Maintain height while rotating
+        camera.lookAt(0, 0, 0); // Look at the center
+      }
+    }
+
+    // Animation
+    function animate() {
+      requestAnimationFrame(animate);
+      updateCamera(); // Update camera if rotation is enabled
+      renderer.render(scene, camera);
+      updateCoordinates();
+    }
+
+    animate();
+
+    // Window resize handler
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
